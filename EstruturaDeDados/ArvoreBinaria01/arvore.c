@@ -60,7 +60,6 @@ TAB *treeDelete(TAB *no, int chave){
             return aux;
         }
         
-
         //2 FILHOS:
          //substitui valor do nó que tenha a maior chave da sua subárvore à esquerda
         TAB *aux;
