@@ -1,42 +1,65 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "arvore.h"
 
-//FATOR DE BALANCEAMENTO = alturaEsquerda - alturaDireita = 0, 1, -1. > 1 ou < -1 Esta Desbalanceada
+//FATOR DE BALANCEAMENTO = alturaDireita - alturaEsquerda = 0, 1, -1. > 1 ou < -1 Esta Desbalanceada
+
+tAVL *newNode(tAVL *no, int chave){
+    no = (tAVL*)malloc(sizeof(tAVL));
+    no->chave = chave;
+    no->esquerda = NULL;
+    no->direita = NULL;
+    no->fb = 0;
+}
+
 
 tAVL *insertAVL(tAVL *no, int chave){
     if (no == NULL){
-        no->chave = chave;
-        no->esquerda = NULL;
-        no->direita = NULL;
-        no->altura = 0; //altura de uma folha
+        newNode(no, chave);
     }
-    if (chave < no->chave)
+    if (chave < no->chave){
         no->esquerda = insert(no->esquerda,chave);
-    else if (chave > no->chave)
+        no->fb--;
+        if (no->fb == -2){
+            if((no->esquerda)->fb == -1 || (no->esquerda)->fb == 0)
+                no = rotacaoDireita(no);
+            else if ((no->esquerda)->fb == 1)
+                no = rotacaoEsquerdaDireita(no);
+        }
+    }
+    else if (chave > no->chave){
         no = insert(no->direita,chave);
+        no->fb++;
+        if (no->fb == 2){
+            if ((no->direita)->fb == +1 || (no->direita)->fb == 0) 
+                no = rotacaoEsquerda(no); 
+            else if (no->direita == -1) 
+                no = rotacaoDireitaEsquerda(no);
+        }
+    }   
     else 
         printf("CHAVE JA EXISTENTE, INSERCAO INVALIDA");
     return no;    
 }
 
-int alturaAVL(tAVL *no){
-    if (no  == NULL)
-        return -1;
-    int alturaEsquerda = alturaAVL(no->esquerda);
-    int alturaDireita = alturaAVL(no->direita);
-    return comparaVal(alturaEsquerda,alturaDireita) + 1;
-    
+tAVL *rotacaoDireita(tAVL *no){
+    tAVL *aux = no->esquerda;
+    no->esquerda = aux->direita;
+    aux->direita = no;
+    return no;
 }
 
-int fatorBalanceamento(tAVL *no){
-    if (no)
-        return alturaAVL(no->esquerda) - alturaAVL(no->direita);
-    return 0;
+tAVL *rotacaoEsquerda(tAVL *no){
+    tAVL *aux = no->direita;
+    no->direita = aux->esquerda;
+    aux->esquerda = no;
+    return no;
 }
 
-int comparaVal(int altura1, int altura2){ //RETORNA O MAIOR ENTRE VALORES;
-    if (altura1 > altura2)
-        return altura1;
-    else return altura2;
+tAVL *rotacaoEsquerdaDireita(tAVL *no){ //DUPLA DIREITA
+    no->esquerda = rotacaoEsquerda(no->esquerda);
+    return rotacaoDireita(no);
+}
+
+tAVL *rotacaoDireitaEsquerda(tAVL *no){ //DUPLA ESQUERDA
+    no->direita = rotacaoDireita(no->direita);
+    return rotacaoEsquerda(no);
 }

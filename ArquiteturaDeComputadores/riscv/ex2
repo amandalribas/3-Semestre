@@ -1,0 +1,36 @@
+#.data
+	#linha: .asciz "\n"
+.text
+li t0, 3 #g
+li t1, 5 #h
+li t2, 2 #i
+li t3,1 #j
+
+
+add t4, t0, t1 #g + h
+add t5, t2, t3 #i + j
+sub t4, t4, t5 #(g + h) - (i + j)
+
+
+
+li t5,1
+li t3, 0
+#addi a0, zero, 0
+for:
+	blt t0, t5, endfor # se 3 < t6 (contador), pula
+	add t3, t3, t5
+	addi t5, t5, 1
+	j for
+endfor:
+
+#li a7, 1
+#mv a0, t3
+#ecall
+
+#li a7, 4
+#la a0, linha
+#ecall
+
+#li a7, 1
+#mv a0, t4
+#aecall

@@ -1,0 +1,49 @@
+.data
+digiteN: .asciz "Digite o Valor de N: "
+.text
+
+li a7, 4 
+la a0, digiteN
+ecall
+
+li a7, 5
+ecall
+
+jal fib
+		
+li a7,1
+ecall
+
+li a7, 10
+ecall
+fib:	
+	beq a0, zero, return #if (n == 0) return
+	li t0, 1
+	beq a0, t0, return #if (n == 1) return
+	
+	addi sp, sp, -8 #sp - stack pointer
+	sw ra, 4(sp) #ra - return adress
+	
+	sw a0, 0(sp)	
+	addi a0, a0, -1
+	jal fib #fib(n-1)
+	
+	mv t0, a0
+	lw a0, 0(sp)
+	addi a0, a0, -2
+	jal fib #fib(n-2)
+	
+	#liberando espaço
+	add a0, t0, a0
+	lw ra, 4(sp)
+	addi sp, sp, 8
+return:
+	ret
+	
+#int fibRecursao(int n){
+    #if (n == 0)
+        #return n;
+    #if (n == 1)
+        #return n;
+    #return fibRecursao(n-1) + fibRecursao(n-2);
+#}

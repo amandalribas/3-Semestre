@@ -70,7 +70,9 @@ TAB *treeDelete(TAB *no, int chave){
     }     
     return no;
 }
-
+/* Quando o Nó a Ser Removido possui 2 filhos, troca o nó removido com:
+- o menor na direita;
+- o maior na esquerda;*/
 
 
 
