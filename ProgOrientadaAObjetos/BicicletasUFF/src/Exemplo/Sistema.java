@@ -7,7 +7,7 @@ public class Sistema {
     private ListaEstacoes estacoes;
     private boolean finalizar;
     
-    Sistema(){
+    public Sistema(){
         this.finalizar = false;
     }
     

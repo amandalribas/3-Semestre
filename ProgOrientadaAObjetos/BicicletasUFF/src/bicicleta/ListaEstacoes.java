@@ -1,23 +1,22 @@
 package bicicleta;
 
-
-public class ListaBicicletas {
-	private Bicicleta[] elementos;
+public class ListaEstacoes {
+	private Estacao[] elementos;
 	private int max;
 	private int n;
 	
-	ListaBicicletas(int max){
+	ListaEstacoes(int max){
 		this.n = 0;
 		this.max = max;
-		this.elementos = new Bicicleta[max];
+		this.elementos = new Estacao[max];
 	}
 	
-	public void append(Bicicleta b) {
+	public void append(Estacao e) {
 		try {
-			this.elementos[this.n++] = b;
-		}catch (ArrayIndexOutOfBoundsException e) {
+			this.elementos[this.n++] = e;
+		}catch (ArrayIndexOutOfBoundsException ex) {
 			this.n--;
-			System.out.println(e);
+			System.out.println(ex);
 		}
 	}
 	
@@ -29,23 +28,22 @@ public class ListaBicicletas {
 		System.out.println("]");
 	}
 	
-	public Bicicleta get(int i) { //Pega a Bicicleta no Indice i
-		Bicicleta b = null;
+	public Estacao get(int i) { //Pega a Bicicleta no Indice i
+		Estacao e = null;
 		try {
-			b = this.elementos[i];
-		}catch (Exception e) {
-			System.out.println(e);
+			e = this.elementos[i];
+		}catch (Exception ex) {
+			System.out.println(ex);
 		}
-		return b;
+		return e;
 	}
 	
-	public Bicicleta getId(int id) {
-		for (Bicicleta b: elementos) {
-			if(b.getId() == id) return b;
+	public Estacao getId(int id) {
+		for (Estacao e: elementos) {
+			if(e.getId() == id) return e;
 		}
 		return null;
 	}
-	
 	
 	public void removerId(int id){	
 		for (int i=0;i<this.n;i++){
@@ -68,5 +66,5 @@ public class ListaBicicletas {
     public int length(){
         return this.n;
     }
-    
+
 }

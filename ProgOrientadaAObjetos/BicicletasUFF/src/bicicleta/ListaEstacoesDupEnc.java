@@ -1,37 +1,37 @@
 package bicicleta;
 
-public class ListaBicicletasDupEnc {
-	private NoDupEncBicicleta inicio;
-	private NoDupEncBicicleta fim;
+public class ListaEstacoesDupEnc {
+	private NoDupEncEstacao inicio;
+	private NoDupEncEstacao fim;
 	private int tamanho;
 	
-	public void append(Bicicleta b) {
-		NoDupEncBicicleta novoNo = new NoDupEncBicicleta(b);
+	public void append(Estacao e) {
+		NoDupEncEstacao novoNo = new NoDupEncEstacao(e);
 		this.tamanho++;
-		/*SE VAZIA INSERE NO INICIO E FIM*/
-		if(this.inicio == null) {
+		if (inicio == null) {
 			this.inicio = novoNo;
 			this.fim = novoNo;
 			return;
 		}
-		/*INSERE NO FINAL*/
+		/*SENAO APPEND NO FINAL*/
 		this.fim.setProximoNo(novoNo);
 		novoNo.setAnteriorNo(this.fim);
 		this.fim = novoNo;
+		this.tamanho++;
 	}
 	
 	public void imprimir() {
-		NoDupEncBicicleta atual = this.inicio;
+		NoDupEncEstacao atual = this.inicio;
 		while (atual != null) {
-			System.out.println(atual.getBicicleta());
+			System.out.println(atual.getEstacao());
 			atual = atual.getProximoNo();		}
 	}
 	
-	public Bicicleta getId(int id) {
-		NoDupEncBicicleta atual = this.inicio;
+	public Estacao getId(int id) {
+		NoDupEncEstacao atual = this.inicio;
 		while (atual != null) {
-			if (atual.getBicicleta().getId() == id) {
-				return atual.getBicicleta();
+			if (atual.getEstacao().getId() == id) {
+				return atual.getEstacao();
 			}
 			atual = atual.getProximoNo();
 		}
@@ -45,24 +45,24 @@ public class ListaBicicletasDupEnc {
 	}
 	
 	public void removerId(int id) {
-		NoDupEncBicicleta atual = this.inicio;
+		NoDupEncEstacao atual = this.inicio;
 		/*REMOVE do INICIO*/
-		if (atual.getBicicleta().getId() == id) {
+		if (atual.getEstacao().getId() == id) {
 			this.inicio = atual.getProximoNo();
 			this.inicio.setAnteriorNo(null);
 			this.tamanho--;
 			return;
 		}
 		/*REMOVE do FINAL*/
-		if (this.fim.getBicicleta().getId() == id) {
+		if (this.fim.getEstacao().getId() == id) {
 			this.fim.getAnteriorNo().setProximoNo(null);
 			this.tamanho--;
 			return;
 		}
-		NoDupEncBicicleta proximo = atual.getProximoNo();
+		NoDupEncEstacao proximo = atual.getProximoNo();
 		/*SENAO*/
 		while (proximo != null) {
-			if (proximo.getBicicleta().getId() == id) {
+			if (proximo.getEstacao().getId() == id) {
 				atual.setProximoNo(proximo.getProximoNo());
 				proximo.getProximoNo().setAnteriorNo(atual);
 				this.tamanho--;
@@ -79,20 +79,20 @@ public class ListaBicicletasDupEnc {
 	public int lenght() {
 		return this.tamanho;
 	}
-	
-	public NoDupEncBicicleta getInicio() {
+
+	public NoDupEncEstacao getInicio() {
 		return inicio;
 	}
 
-	public void setInicio(NoDupEncBicicleta inicio) {
+	public void setInicio(NoDupEncEstacao inicio) {
 		this.inicio = inicio;
 	}
 
-	public NoDupEncBicicleta getFim() {
+	public NoDupEncEstacao getFim() {
 		return fim;
 	}
 
-	public void setFim(NoDupEncBicicleta fim) {
+	public void setFim(NoDupEncEstacao fim) {
 		this.fim = fim;
 	}
 
@@ -103,7 +103,6 @@ public class ListaBicicletasDupEnc {
 	public void setTamanho(int tamanho) {
 		this.tamanho = tamanho;
 	}
-
 	
 	
 	

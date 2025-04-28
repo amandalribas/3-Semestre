@@ -1,0 +1,6 @@
+1 EstacaoEngenharia PraiaVermelha 20
+2 EstacaoIC PraiaVermelha 20
+3 EstacaoGragoata Gragoata 20
+4 EstacaoValonguinho Valonguinho 20
+5 EstacaoDireito Direito 20
+6 EstacaoAntonioPedro HospitalAntonioPedro 20

@@ -3,7 +3,6 @@ package bicicleta;
 public class Bicicleta {
 	public static enum TIPO{COMUM, GPS};
 	public static enum ESTADO{ALUGADA, PARADA, MANUTENCAO};
-	private static int numBicicletas;   
 	private int id;
 	private int numPatrimonio;
 	private Usuario usuario;
@@ -24,9 +23,13 @@ public class Bicicleta {
 		this.usuario = usuario;
 	}
 	
-	/*public void estacionar(){
-	 --implementar;
-	 }*/
+	public void estacionar(Estacao estacao){
+		if (this.estacao != null)
+			this.estacao.removerBicicleta(this.getId());
+		estacao.adicionarBicicleta(this);
+		this.estacao = estacao;
+		this.estado = ESTADO.PARADA;
+	}
 	
 	/*
 	public ponto2D getPosicao(){

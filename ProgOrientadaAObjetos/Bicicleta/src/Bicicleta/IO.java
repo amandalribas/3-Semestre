@@ -7,8 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+import Exemplo.ListaEstacoes;
+
 
 public class IO {
+	
+	public static ListaEstacoes lerEstacoes(String nomeArq){
+        ListaEstacoes les = null;
+        
+        /* Implementar o método que lê os dados das estações*/
+        
+        return les;
+        
+    }
+	
 	/*
 	public ListaBicicletas lerBicicletasArquivo() { // Adiciona a Lista de Bicicletas 
 		ListaBicicletas lb = null;
