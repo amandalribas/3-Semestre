@@ -38,10 +38,14 @@ public class Estacao {
         
         /* Modifique este metodo para que ele retorne uma string contendo os ids das bicicletas */
         String s = "[";
-        
-        
+        if (this.bicicletas!=null) {
+        	for (int i = 0; i< this.bicicletas.length();i++) {
+        		s += this.bicicletas.get(i).getId();
+        		if (i<bicicletas.length()-1)
+        			s += ", ";
+        	}
+        }
         s+="]";
-        
         return s;
     }
 

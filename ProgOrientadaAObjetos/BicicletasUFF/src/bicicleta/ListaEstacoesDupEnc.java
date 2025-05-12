@@ -1,6 +1,20 @@
 package bicicleta;
 
 public class ListaEstacoesDupEnc {
+	
+
+	private class NoDupEncEstacao {
+		public Estacao estacao;
+		public NoDupEncEstacao anteriorNo;
+		public NoDupEncEstacao proximoNo;
+	
+		NoDupEncEstacao(Estacao estacao){
+			this.estacao = estacao;
+			this.anteriorNo = null;
+			this.proximoNo = null;
+		}
+	}
+	
 	private NoDupEncEstacao inicio;
 	private NoDupEncEstacao fim;
 	private int tamanho;
@@ -14,8 +28,8 @@ public class ListaEstacoesDupEnc {
 			return;
 		}
 		/*SENAO APPEND NO FINAL*/
-		this.fim.setProximoNo(novoNo);
-		novoNo.setAnteriorNo(this.fim);
+		this.fim.proximoNo = novoNo;
+		novoNo.anteriorNo = this.fim;
 		this.fim = novoNo;
 		this.tamanho++;
 	}
@@ -23,17 +37,17 @@ public class ListaEstacoesDupEnc {
 	public void imprimir() {
 		NoDupEncEstacao atual = this.inicio;
 		while (atual != null) {
-			System.out.println(atual.getEstacao());
-			atual = atual.getProximoNo();		}
+			System.out.println(atual.estacao);
+			atual = atual.proximoNo;		}
 	}
 	
 	public Estacao getId(int id) {
 		NoDupEncEstacao atual = this.inicio;
 		while (atual != null) {
-			if (atual.getEstacao().getId() == id) {
-				return atual.getEstacao();
+			if (atual.estacao.getId() == id) {
+				return atual.estacao;
 			}
-			atual = atual.getProximoNo();
+			atual = atual.proximoNo;
 		}
 		System.out.println("BICICLETA NAO ENCONTRADA!");
 		return null;
@@ -47,29 +61,29 @@ public class ListaEstacoesDupEnc {
 	public void removerId(int id) {
 		NoDupEncEstacao atual = this.inicio;
 		/*REMOVE do INICIO*/
-		if (atual.getEstacao().getId() == id) {
-			this.inicio = atual.getProximoNo();
-			this.inicio.setAnteriorNo(null);
+		if (atual.estacao.getId() == id) {
+			this.inicio = atual.proximoNo;
+			this.inicio.anteriorNo = null;
 			this.tamanho--;
 			return;
 		}
 		/*REMOVE do FINAL*/
-		if (this.fim.getEstacao().getId() == id) {
-			this.fim.getAnteriorNo().setProximoNo(null);
+		if (this.fim.estacao.getId() == id) {
+			this.fim.anteriorNo.proximoNo = null;
 			this.tamanho--;
 			return;
 		}
-		NoDupEncEstacao proximo = atual.getProximoNo();
+		NoDupEncEstacao proximo = atual.proximoNo;
 		/*SENAO*/
 		while (proximo != null) {
-			if (proximo.getEstacao().getId() == id) {
-				atual.setProximoNo(proximo.getProximoNo());
-				proximo.getProximoNo().setAnteriorNo(atual);
+			if (proximo.estacao.getId() == id) {
+				atual.proximoNo = proximo.proximoNo;
+				proximo.proximoNo.anteriorNo = atual;
 				this.tamanho--;
 				return;
 			}
 			atual = proximo;
-			proximo = proximo.getProximoNo();
+			proximo = proximo.proximoNo;
 		}
 		
 		System.out.println("ID NAO encontrado!");

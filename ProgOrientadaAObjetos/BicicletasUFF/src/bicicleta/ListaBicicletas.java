@@ -50,7 +50,7 @@ public class ListaBicicletas {
 	public void removerId(int id){	
 		for (int i=0;i<this.n;i++){
 			if (this.elementos[i].getId() == id){
-				for (int j = i; j<this.n; j ++){
+				for (int j = i; j<this.n; j++){
 					this.elementos[j] = this.elementos[j+1];
 		        }
 				this.n--;

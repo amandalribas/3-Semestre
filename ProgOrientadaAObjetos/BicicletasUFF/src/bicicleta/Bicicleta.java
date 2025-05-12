@@ -56,15 +56,23 @@ public class Bicicleta {
 		return s;
 	}
 	
+	
+	public static String usuarioToString(Usuario usuario){
+        
+        String s = "";
+        if (usuario!=null) s += usuario.getId();
+        return s;
+    }
+	
 	@Override
 	public String toString() {
 		String nomeEstacao = "Nao Alocada";
 		if (estacao != null) nomeEstacao = estacao.getNome();
 		return "Bicicleta = [ ID: " + id +
 							", Numero de Patrimonio: " + numPatrimonio +
-							", Tipo: " + tipo + 
+							", Tipo: " + tipoToString(this.tipo) + 
 							", Estado: " + estado + 
-							", Usuario: " + usuario +
+							", Usuario: " + usuarioToString(this.usuario)  +
 							", Estacao: " + estacao + "]";
 		
 	}

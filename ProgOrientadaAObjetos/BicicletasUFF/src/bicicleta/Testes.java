@@ -2,7 +2,7 @@ package bicicleta;
 
 public class Testes {
 	
-	public void mergeSort(ListaBicicletas array){
+	/*public void mergeSort(ListaBicicletas array){
         //MERGE SORT
 		int tamanho = array.length();
 		if (tamanho < 2) // sorted
@@ -32,5 +32,5 @@ public class Testes {
 	
 	public void limpaLista() {
 		for (int i = 0;i<this.length();i++) this.elementos[i] = null;
-	}
+	}*/
 }

@@ -1,6 +1,17 @@
 package bicicleta;
 
 public class ListaBicicletasEnc {
+	
+	private class NoEncBicicleta {
+		public Bicicleta bicicleta;
+		public NoEncBicicleta proximoNo;
+		
+		public NoEncBicicleta(Bicicleta bicicleta) {
+			this.bicicleta = bicicleta;
+			this.proximoNo = null;
+		}
+	}	
+	
 	private NoEncBicicleta inicio;
 	private NoEncBicicleta fim;
 	private int tamanho;
@@ -17,7 +28,7 @@ public class ListaBicicletasEnc {
 			return;
 		}
 		/*SENAO: APPEND NO FINAL)*/
-		this.fim.setProximoNo(novoNo);
+		this.fim.proximoNo = novoNo;
 		this.fim = novoNo;
 		
 	}
@@ -25,17 +36,18 @@ public class ListaBicicletasEnc {
 	public void imprimir() {
 		NoEncBicicleta atual = this.inicio;
 		while (atual != null) {
-			System.out.println(atual.getBicicleta());
-			atual = atual.getProximoNo();		}
+			System.out.println(atual.bicicleta);
+			atual = atual.proximoNo;		
+		}
 	}
 	
 	public Bicicleta getId(int id) {
 		NoEncBicicleta atual = this.inicio;
 		while (atual != null) {
-			if (atual.getBicicleta().getId() == id) {
-				return atual.getBicicleta();
+			if (atual.bicicleta.getId() == id) {
+				return atual.bicicleta;
 			}
-			atual = atual.getProximoNo();
+			atual = atual.proximoNo;
 		}
 		System.out.println("BICICLETA NAO ENCONTRADA!");
 		return null;
@@ -43,18 +55,18 @@ public class ListaBicicletasEnc {
 	
 	public void removerId(int id) {
 		NoEncBicicleta atual = this.inicio;
-		if (atual.getBicicleta().getId() == id) {
-			this.inicio = atual.getProximoNo();
+		if (atual.bicicleta.getId() == id) {
+			this.inicio = atual.proximoNo;
 			this.tamanho--;
 			return;
 		}
-		while (atual.getProximoNo()!=null) {
-			if (atual.getProximoNo().getBicicleta().getId() == id) {
-				atual.setProximoNo(atual.getProximoNo().getProximoNo());
+		while (atual.proximoNo!=null) {
+			if (atual.proximoNo.bicicleta.getId() == id) {
+				atual.proximoNo = atual.proximoNo.proximoNo;
 				this.tamanho--;
 				return;
 			}
-			atual = atual.getProximoNo();
+			atual = atual.proximoNo;
 		}
 		System.out.println("ID NAO encontrado!");
 	}

@@ -94,7 +94,7 @@ public class IO {
 		try {
 			Sistema si = new Sistema();
 			String nomeArquivo = si.leNomeArquivo();
-			fw = new FileWriter(nomeArquivo);
+			fw = new FileWriter(nomeArquivo, true);
 			bw = new BufferedWriter(fw);
 			keyboard = new Scanner(System.in);
 			System.out.println("Quantas Bicicletas quer Cadastrar?");

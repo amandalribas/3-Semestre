@@ -1,6 +1,17 @@
 package bicicleta;
 
 public class ListaEstacoesEnc {
+	
+	private class NoEncEstacao {
+		public Estacao estacao;
+		public NoEncEstacao proximoNo;
+		
+		NoEncEstacao(Estacao estacao){
+			this.estacao = estacao;
+			this.proximoNo = null;
+		}
+	}
+	
 	private NoEncEstacao inicio;
 	private NoEncEstacao fim;
 	private int tamanho;
@@ -15,24 +26,24 @@ public class ListaEstacoesEnc {
 			return;
 		}
 		/*SENAO: APPEND NO FINAL)*/
-		this.fim.setProximoNo(novoNo);
+		this.fim.proximoNo = novoNo;
 		this.fim = novoNo;
 	}
 	
 	public void imprimir() {
 		NoEncEstacao atual = this.inicio;
 		while (atual != null) {
-			System.out.println(atual.getEstacao());
-			atual = atual.getProximoNo();		}
+			System.out.println(atual.estacao);
+			atual = atual.proximoNo;		}
 	}
 	
 	public Estacao getId(int id) {
 		NoEncEstacao atual = this.inicio;
 		while (atual != null) {
-			if (atual.getEstacao().getId() == id) {
-				return atual.getEstacao();
+			if (atual.estacao.getId() == id) {
+				return atual.estacao;
 			}
-			atual = atual.getProximoNo();
+			atual = atual.proximoNo;
 		}
 		System.out.println("BICICLETA NAO ENCONTRADA!");
 		return null;
@@ -40,18 +51,18 @@ public class ListaEstacoesEnc {
 	
 	public void removerId(int id) {
 		NoEncEstacao atual = this.inicio;
-		if (atual.getEstacao().getId() == id) {
-			this.inicio = atual.getProximoNo();
+		if (atual.estacao.getId() == id) {
+			this.inicio = atual.proximoNo;
 			this.tamanho--;
 			return;
 		}
-		while (atual.getProximoNo()!=null) {
-			if (atual.getProximoNo().getEstacao().getId() == id) {
-				atual.setProximoNo(atual.getProximoNo().getProximoNo());
+		while (atual.proximoNo !=null) {
+			if (atual.proximoNo.estacao.getId() == id) {
+				atual.proximoNo = atual.proximoNo.proximoNo;
 				this.tamanho--;
 				return;
 			}
-			atual = atual.getProximoNo();
+			atual = atual.proximoNo;
 		}
 		System.out.println("ID NAO encontrado!");
 	}
