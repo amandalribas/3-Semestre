@@ -1,80 +1,126 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define F 4
 
 typedef struct No{
-    long long int vencedor; //valor da menor chave daquela sub-árvore
-    struct No endVencedor;
+    int vencedor; //valor da menor chave daquela sub-árvore
+    struct No *endVencedor; //ponteiro para o nó folha que tem aquela chave
     FILE *f; //variável FILE atrelada ao arquivo do vencedor
-    struct No esquerda; //ponteiro para o filho da esquerda
-    struct No direita; //ponteiro para o filho da direita
+    struct No *esquerda;
+    struct No *direita;
 }TNo;
 
-typedef struct listaVencedores{
-    TNo *no;
-    struct listaVencedores *proximo;
+typedef struct listaNo{
+    TNo *folha;
+    struct listaNo *proximo;
 }TLista;
 
-#define F 40
-//quant = F - 1 (?)
+TLista* append(TLista *lista, TNo *no){ 
+    TLista *novo = (TLista*)malloc(sizeof(TLista));
+    novo->folha = no;
+    novo->proximo = NULL;
+    if (lista == NULL){
+        return novo;
+    }else{
+        TLista *atual = lista;
+        while (atual != NULL)
+            atual = atual->proximo;
+        atual->proximo = novo;
+    }
+    
+    return lista;
+}
+
+TLista* remove(TLista *lista){
+    TLista *atual = lista;
+    if (lista!=NULL)
+        lista = lista->proximo;
+    free(atual);
+    return lista;
+}
 
 TNo* criaNo(FILE *arquivo){
-    long long int valor;
-    fscanf(arquivo,"%lld", &valor);
+    TNo *novo = (TNo*)malloc(sizeof(TNo));
+    novo->direita = NULL;
+    novo->esquerda = NULL;
+    novo->endVencedor = NULL;
+    fscanf(arquivo, "%d", &novo->vencedor);
+    novo->f = arquivo;
+    return novo;
+}
+
+TNo* criaNoArvore(TNo *direita, TNo *esquerda){
+    TNo *atual;
     
-    TNo *no = (TNo*)malloc(sizeof(TNo));
-    no->vencedor = valor;
-    no->endVencedor = no;
-    no->esquerda = NULL;
-    no->direita = NULL;
-    no->f = arquivo;
-    return no;
+    atual = (TNo*)malloc(sizeof(TNo));
+    atual->direita = direita;
+    atual->esquerda = esquerda;
+
+    if(esquerda->vencedor > direita->vencedor){
+        atual->vencedor = direita->vencedor;
+        atual->f = direita->f;
+        atual->endVencedor = direita;
+    }else{
+        atual->vencedor = esquerda->vencedor;
+        atual->f = esquerda->f;
+        atual->endVencedor = esquerda;
+    }
+    return atual;
 }
 
-void append(TLista **lista, TNo *no) {
-    TLista *novo = (TLista*)malloc(sizeof(TLista));
-    novo->no = no;
-    novo->proximo = NULL;
-
-    if (*lista == NULL) *lista = novo;
-    else {
-        TLista *aux = *lista;
-        while (aux->proximo != NULL) aux = aux->proximo;
-        aux->proximo = novo;
+char** criaListaArquivos(int quantidade){
+    char **lista = malloc(sizeof(char)*quantidade);
+    for (int i = 1; i <= quantidade; i++){
+        lista[i] = malloc(sizeof(char)*quantidade);
+        sprintf(lista[i],"particao%d.txt",i);    
     }
+    return lista;
 }
 
-TNo *comparacao(TNo *a, TNo *b){
-    TNo resultado = (TNo*)malloc(sizeof(TNo));
-    if (a->vencedor < TNo *b){
-
+TNo* criaArvoreVencedores(char **listaArquivos, int quantidade, char *nomeSaida){
+    TLista *lista = NULL;
+    FILE **arquivos;
+    int quant = quantidade;
+    for (int i = 0; i < quantidade; i++){
+        arquivos[i] = fopen(listaArquivos[i],"r");
+        TNo *noAtual = criaNo(arquivos[i]);
+        lista = append(lista, noAtual);
     }
+
+    TNo *p = NULL;
+    while (quant > 1){
+        p = criaNoArvore(lista, lista->proximo);
+        lista = remove(lista);
+        lista = remove(lista);
+        lista = append(lista, p);
+        quant =- 2;
+    }
+    
+    //Fechando Arquivos
+    for (int i = 0; i < quantidade; i++){
+        fclose(arquivos[i]);
+    }
+    free(arquivos);
+    return p;
 }
 
-void arvoreVencedores(char **listaArquivos, int quant, char *nomeSaida){
-    TLista listaNo;
-    FILE *arquivoAtual;
-    TNo *noAtual;
-    int listaTamanho = 0;
-    for (int i = 0; i <= quant; i++){
-        arquivoAtual = fopen(listaArquivos[i],"r");
-        noAtual = criaNo(arquivoAtual);
-        append(&listaNo, noAtual);
-        fclose(arquivoAtual);
-        listaTamanho++;
-    }
-    while (listaTamanho > 1){
-        if(listaTamanho % 2 == 0){
-            
-            listaTamanho -= 2;
-        }        
-    }
+void intercalacao(int numParticoes){
+    
+
 }
 
-/*Entrada:
- Lista com os nomes dos arquivos de partições (entrada)
- Quantidade de arquivos de entrada
- Nome do arquivo de saída
+int main(void){
+
+    return 0;
+}
+
+/*
+MONTAGEM ARVORE DOS VENCEDORES:
+Entrada:
+Lista com os nomes dos arquivos de partições (entrada)
+Quantidade de arquivos de entrada
+Nome do arquivo de saída
 Algoritmo:
 1. Criar uma lista de nós vazia
 2. Criar nós folha da árvore, e adicioná-los na lista
@@ -82,5 +128,14 @@ Algoritmo:
     1. Retirar os 2 primeiros nós da lista
     2. Criar um nó p para ser o pai desses dois, escolhendo o vencedor e ajustando os campos do nó criado de acordo
     3. Adicionar p no final da lista
-    4. O elemento que sobrou na lista é a raiz da árvore de vencedores
- */
+4. O elemento que sobrou na lista é a raiz da árvore de vencedores
+
+INTERCALACAO OTIMA:
+
+. Criar uma lista com os nomes dos arquivos a intercalar
+2. Enquanto houver mais de 1 arquivo na lista
+1. Retirar os F-1 primeiros itens da lista e intercalá-los
+2. Colocar o arquivo resultante no final da lista
+3. O arquivo que sobrar na lista será o arquivo resultante (arquivo completo
+que contém todos os registros)
+*/
