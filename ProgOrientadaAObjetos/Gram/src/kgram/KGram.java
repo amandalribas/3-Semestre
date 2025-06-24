@@ -40,6 +40,7 @@ public class KGram {
 		return conjunto;
 	}
 	
+
 	public static void main(String[] args) {
 		String texto = "Amanda se chama Amanda e o maior problema da Amanda é a amanda.";
 		Map<String, Integer> m = quantidadePalavras(texto);

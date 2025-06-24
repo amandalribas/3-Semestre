@@ -3,12 +3,6 @@ package Buscador;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- *  Considere um array de inteiros v não ordenado (não é possível usar busca binária). 
- *  Escreva um programa,que dado um inteiro x, e usando K Threads, 
- *  efetue a busca de x em v. Considere que v e k sejam potencias de 2
- */
-
 public class BuscadorTest {
 	public static void main(String[] args) {
 		int K = 8;
@@ -47,7 +41,6 @@ public class BuscadorTest {
 				e.printStackTrace();
 			}
 		}
-	
 	
 	}
 }
