@@ -17,10 +17,12 @@ import java.util.function.Predicate;
 
 public class ArtigoEPreposicao {
 	
+
+	
 	public static Collection<String> removeSelecionados(String[] p, Predicate<String> condicao){
 		Collection<String> resultado = new ArrayList<String>();
 		for (String atual: p) {
-			if (condicao.test(atual))
+			if (condicao.test(atual)) // if !removiveis.cointains(p.toLowerCase()) //if colecao2.contains(c1.toLowerCase())
 				resultado.add(atual);
 		}
 		return resultado;

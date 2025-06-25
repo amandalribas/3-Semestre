@@ -46,7 +46,12 @@ public class Product{
 		this.writeable = writeable;
 	}
 
+	@Override
+	public String toString() {
+		return "Product [id=" + id + ", writeable=" + writeable + "]";
+	}
 
 
+	
 	
 }
