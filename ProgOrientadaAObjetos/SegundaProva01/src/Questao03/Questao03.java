@@ -12,7 +12,7 @@ public class Questao03 {
 	
 	public static int[][] divideMatriz(int m[][], int inicio_linha, int fim_linha, int inicio_coluna, int fim_coluna, int n){
 		int submatriz[][] = new int[n][n];
-		
+	
 		for (int i = inicio_linha;i<fim_linha;i++) {
 			for (int j = inicio_coluna; j < fim_coluna;j++) {
 				submatriz[i-inicio_linha][j-inicio_coluna] = m[i][j];
@@ -52,6 +52,7 @@ public class Questao03 {
 		int novo_n = n/(qntd_matrizes/2);
 		
 		int contadorMatrizes = 0;
+		
 		for (int i = 0; i < (qntd_matrizes/2);i++) {
 			for (int j = 0; j < (qntd_matrizes/2);j++) {
 				int submatriz[][] = divideMatriz(m, i*novo_n, (i*novo_n)+novo_n, j*novo_n, (j*novo_n) + novo_n, novo_n);
@@ -70,6 +71,7 @@ public class Questao03 {
 		for (Iterator<Thread> it = thrList.iterator();it.hasNext();) {
 			it.next().start();
 		}
+		
 		
 		for (Iterator<Thread> it = thrList.iterator();it.hasNext();) {
 			try {
