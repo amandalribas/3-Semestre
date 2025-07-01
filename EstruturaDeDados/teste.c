@@ -1,4 +1,21 @@
-#include "geraRegistros.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+
+#define TAM_ARQTXT 80
+#define QUANT_REG 100
+
+#define REG_TAM sizeof(TRegistro)
+
+
+typedef struct tRegistro {
+    long long int cpf;
+    char nome[60];
+    float nota;
+} TRegistro;
 
 
 long long int geraCPF(){
@@ -70,8 +87,8 @@ void escreveRegBin(FILE *arq, TRegistro *reg){
 
 
 void geraRegistros(char *nomeArquivo, int quantidade){
-    char **nomes = leArquivoTexto("output/nomes.txt");
-    char **sobrenomes = leArquivoTexto("output/sobrenomes.txt");
+    char **nomes = leArquivoTexto("nomes.txt");
+    char **sobrenomes = leArquivoTexto("sobrenomes.txt");
     FILE *arq = fopen(nomeArquivo, "wb");
     TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
     for (int i = 0; i < quantidade; i++){
@@ -107,13 +124,83 @@ void imprimeArqBin(char *nomeArquivo){
     }
 }
 
-/*
+
+int pai(int posicao){
+    return posicao/(2);
+}
+
+int filhoEsq(int posicao){
+    return posicao*(2);
+}
+
+int filhoDir(int posicao){
+    return (posicao*2+1);
+}
+
+void subir(FILE *arq, int posicao){
+    int posPai = pai(posicao);
+    if (posPai>=1){
+        fseek(arq, posicao * REG_TAM, SEEK_SET);
+        TRegistro *reg = leRegistroBin(arq);
+    
+        fseek(arq, posPai * REG_TAM, SEEK_SET);
+        TRegistro *regPai = leRegistroBin(arq);
+
+        if (reg->cpf > regPai->cpf){
+            fseek(arq, posicao * REG_TAM, SEEK_SET);
+            escreveRegBin(arq, regPai);
+
+            fseek(arq,posPai * REG_TAM, SEEK_SET);
+            escreveRegBin(arq,reg);
+            fflush(arq);
+            subir(arq,posPai);
+        }
+        free(reg);
+    }
+}
+
+int insere(FILE *arq, TRegistro *reg, int tamanho) {
+    tamanho++;
+    fseek(arq, tamanho * REG_TAM, SEEK_SET);
+    escreveRegBin(arq, reg);
+    fflush(arq);
+    subir(arq, tamanho);
+    
+    return tamanho;
+}
+
+
+void imprimeHeap(char *nomeArquivo){
+    FILE *arq = fopen(nomeArquivo, "rb");
+    if (arq == NULL) return;
+    TRegistro *reg;
+    printf("\n");
+    int i = 0;
+    while ((reg = leRegistroBin(arq)) != NULL){
+        printf("\nRegistro %d= { CPF= %lld , NOME= %s, NOTA= %.1f}",i, reg->cpf, reg->nome, reg->nota);
+        i++;
+        free(reg);
+    }
+}
+
+
 int main(void){
-    srand(time(NULL));
-    geraRegistros("registros.bin",QUANT_REG);
-    //imprimeArqBin("registros.bin");
+    int tamanho = 0;
+    FILE *arq = fopen("output/registros.bin", "rb+");
+    FILE *arqHeap = fopen("output/heap.bin", "wb+");
+    TRegistro *reg = leRegistroBin(arq);
+    for (int i = 0; i < QUANT_REG; i++){
+        reg = leRegistroBin(arq);
+        tamanho = insere(arqHeap, reg, tamanho);
+        free(reg);
+    }
+    fclose(arqHeap);
+    fclose(arq);
+    printf("Total de registros inseridos: %d\n", tamanho);
 
-    imprimeArqBin("heap.bin");
-
+    imprimeHeap("output/heap.bin");
+    
     return 0;
-}*/
+
+
+}

@@ -9,11 +9,11 @@
 
 
 #define TAM_ARQTXT 80
-#define QUANT_REG 100
+#define QUANT_REG 200
 
 typedef struct tRegistro {
     long long int cpf;
-    char nome[100];
+    char nome[60];
     float nota;
 } TRegistro;
 
