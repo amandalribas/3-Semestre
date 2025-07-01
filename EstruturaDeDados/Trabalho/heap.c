@@ -51,9 +51,9 @@ int insere(FILE *arq, TRegistro *reg, int tamanho) {
 void imprimeHeap(FILE *arq){
     //FILE *arq = fopen(nomeArquivo, "rb");
     if (arq == NULL) return;
-    TRegistro *reg;
+    TRegistro *reg = leRegistroBin(arq);
     printf("\n");
-    int i = 0;
+    int i = 1;
     while ((reg = leRegistroBin(arq)) != NULL){
         printf("\nRegistro %d= { CPF= %lld , NOME= %s, NOTA= %.1f}",i, reg->cpf, reg->nome, reg->nota);
         i++;
@@ -69,16 +69,17 @@ int main(void){
     int tamanho = 0;
     FILE *arq = fopen("output/registros.bin", "rb+");
     FILE *arqHeap = fopen("output/heap.bin", "wb+");
-    TRegistro *reg = leRegistroBin(arq);
+    
     for (int i = 0; i < QUANT_REG; i++){
-        reg = leRegistroBin(arq);
+        TRegistro *reg = leRegistroBin(arq);
         tamanho = insere(arqHeap, reg, tamanho);
         free(reg);
     }
 
+    printf("\nTotal de registros inseridos: %d\n", tamanho);
+
     fclose(arqHeap);
     fclose(arq);
-    printf("Total de registros inseridos: %d\n", tamanho);
     
     FILE *arqHeap2 = fopen("output/heap.bin", "rb");
 
