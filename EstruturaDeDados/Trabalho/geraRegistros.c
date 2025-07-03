@@ -9,9 +9,9 @@ long long int geraCPF(){
     return cpf;
 }
 
-float geraNota(){
-    float nota = (rand() % 101) / 10.0;
-    printf("\nNOTA GERADA: %.1f", nota);
+int geraNota(){
+    int nota = (rand() % 101) ;
+    printf("\nNOTA GERADA: %d", nota);
     return nota;
 }
 
@@ -63,18 +63,18 @@ char *geraNome(char **nomes, char **sobrenomes){
 void escreveRegBin(FILE *arq, TRegistro *reg){
     if (arq == NULL) return;
     fwrite(&reg->cpf, sizeof(long long int), 1, arq);
-    fwrite(&reg->nota, sizeof(float), 1, arq);
+    fwrite(&reg->nota, sizeof(int), 1, arq);
     fwrite(reg->nome, sizeof(char),sizeof(reg->nome), arq);
 
 }
 
 
-void geraRegistros(char *nomeArquivo, int quantidade){
-    char **nomes = leArquivoTexto("output/nomes.txt");
-    char **sobrenomes = leArquivoTexto("output/sobrenomes.txt");
-    FILE *arq = fopen(nomeArquivo, "wb");
+void geraRegistros(){
+    char **nomes = leArquivoTexto(TXT_NOME);
+    char **sobrenomes = leArquivoTexto(TXT_SOBRENOME);
+    FILE *arq = fopen(ARQ_REG, "wb");
     TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
-    for (int i = 0; i < quantidade; i++){
+    for (int i = 0; i < QUANT_REG; i++){
         printf("\n\nRegistro %d", i);
         reg->cpf = geraCPF();
         reg->nota = geraNota();
@@ -90,7 +90,7 @@ TRegistro *leRegistroBin(FILE *arq){
         free(reg);
         return NULL;
     }
-    fread(&reg->nota, sizeof(float), 1, arq);
+    fread(&reg->nota, sizeof(int), 1, arq);
     fread(reg->nome, sizeof(char),sizeof(reg->nome), arq);
 
     return reg;
@@ -103,17 +103,17 @@ void imprimeArqBin(char *nomeArquivo){
     printf("\n");
     for (int i = 0; i < QUANT_REG; i++){
         reg = leRegistroBin(arq);
-        printf("\nRegistro %d= { CPF= %lld , NOME= %s, NOTA= %.1f}",i, reg->cpf, reg->nome, reg->nota);
+        printf("\nRegistro %d= { CPF= %lld , NOME= %s, NOTA= %d }",i, reg->cpf, reg->nome, reg->nota);
     }
 }
-
 /*
+
 int main(void){
     srand(time(NULL));
-    geraRegistros("registros.bin",QUANT_REG);
-    //imprimeArqBin("registros.bin");
+    geraRegistros("output/registros.bin",QUANT_REG);
+    imprimeArqBin("output/registros.bin");
 
-    imprimeArqBin("heap.bin");
+    //imprimeArqBin("heap.bin");
 
     return 0;
 }*/

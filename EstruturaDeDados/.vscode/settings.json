@@ -4,6 +4,9 @@
         "string.h": "c",
         "ordem.h": "c",
         "stdlib.h": "c",
-        "arvore.h": "c"
+        "arvore.h": "c",
+        "geraregistros.h": "c",
+        "heap.h": "c",
+        "time.h": "c"
     }
 }

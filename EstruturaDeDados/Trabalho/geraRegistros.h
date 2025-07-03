@@ -1,6 +1,7 @@
 
-#ifndef REGISTRO_H
-#define REGISTRO_H
+#ifndef GERA_REGISTROS_H
+#define GERA_REGISTROS_H
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,18 +10,21 @@
 
 
 #define TAM_ARQTXT 80
-#define QUANT_REG 200
+#define QUANT_REG 10000
+
+#define ARQ_REG "arquivos/registros.bin"
+
+#define TXT_NOME "arquivos/nomes.txt"
+#define TXT_SOBRENOME "arquivos/sobrenomes.txt"
 
 typedef struct tRegistro {
     long long int cpf;
-    char nome[60];
-    float nota;
+    char nome[50];
+    int nota;
 } TRegistro;
 
 long long int geraCPF();
-
-float geraNota();
-
+int geraNota();
 char *geraNome(char **nomes, char **sobrenomes);
 
 char **leArquivoTexto(const char *nomeArquivo);
@@ -29,10 +33,10 @@ void imprimeVetor(char **nomes);
 
 void escreveRegBin(FILE *arq, TRegistro *reg);
 
-void geraRegistros(char *nomeArquivo, int quantidade);
+void geraRegistros();
 
 TRegistro *leRegistroBin(FILE *arq);
-
 void imprimeArqBin(char *nomeArquivo);
+
 
 #endif 
