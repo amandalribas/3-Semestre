@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "hash.h": "c",
+        "stdbool.h": "c",
+        "bmais.h": "c"
+    }
+}

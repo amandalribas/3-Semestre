@@ -13,7 +13,7 @@ int filhoDir(int posicao){
     return (posicao*2+1);
 }
 
-void subir(FILE *arq, int posicao){
+void sobe(FILE *arq, int posicao){
     int posPai = pai(posicao);
     if (posPai>=1){
         fseek(arq, posicao * REG_TAM, SEEK_SET);
@@ -29,14 +29,14 @@ void subir(FILE *arq, int posicao){
             fseek(arq,posPai * REG_TAM, SEEK_SET);
             escreveRegBin(arq,reg);
             fflush(arq);
-            subir(arq,posPai);
+            sobe(arq,posPai);
         }
         free(reg);
         free(regPai);
     }
 }
 
-void descer(FILE *arq, int posicao, int tamanho){ //se ja tiver removido antes, o TAM é menor que QUANT_REG
+void desce(FILE *arq, int posicao, int tamanho){ //se ja tiver removido antes, o TAM é menor que QUANT_REG
     
      fseek(arq,posicao *REG_TAM, SEEK_SET); //registro inicial
     TRegistro *reg = leRegistroBin(arq);
@@ -77,7 +77,7 @@ void descer(FILE *arq, int posicao, int tamanho){ //se ja tiver removido antes, 
         fseek(arq, posMaior * REG_TAM, SEEK_SET);
         escreveRegBin(arq,reg);
         fflush(arq);
-        descer(arq,posMaior,tamanho);
+        desce(arq,posMaior,tamanho);
     
     }
     free(reg);
@@ -87,24 +87,24 @@ void descer(FILE *arq, int posicao, int tamanho){ //se ja tiver removido antes, 
 }
 
 
-int inserir(FILE *arq, TRegistro *reg, int tamanho) {
+int insereHeap(FILE *arq, TRegistro *reg, int tamanho) {
     tamanho++;
     fseek(arq, tamanho * REG_TAM, SEEK_SET);
     escreveRegBin(arq, reg);
     fflush(arq);
-    subir(arq, tamanho);
+    sobe(arq, tamanho);
     //printf("\nInseri %lld", reg->cpf);
     return tamanho;
 }
 
-TRegistro *buscar(FILE *arq){
+TRegistro *buscaHeap(FILE *arq){
     fseek(arq, REG_TAM, SEEK_SET); //poe no inicio pulando o vazio inicial 
     TRegistro *reg = leRegistroBin(arq);
     printf("\nBusca:\nRegistro = { CPF= %lld , NOME= %s, NOTA= %d}", reg->cpf, reg->nome, reg->nota);
     return reg;
 }
 
-int excluir(FILE *arq, int tamanho){
+int excluiHeap(FILE *arq, int tamanho){
     
     fseek(arq, REG_TAM * tamanho, SEEK_SET);
     
@@ -115,7 +115,7 @@ int excluir(FILE *arq, int tamanho){
 
     tamanho--;
 
-    descer(arq,1,tamanho);
+    desce(arq,1,tamanho);
 
     return tamanho;
 }
@@ -145,7 +145,7 @@ void geraHeap(){
     
     for (int i = 0; i < QUANT_REG; i++){
         TRegistro *reg = leRegistroBin(arq);
-        tamanho = inserir(arqHeap, reg, tamanho);
+        tamanho = insereHeap(arqHeap, reg, tamanho);
         free(reg);
     }
     fclose(arq); //arquivo de registros
@@ -160,42 +160,13 @@ void geraHeap(){
     fclose(arqHeap);
 
     /* ////////////////// BUSCA E REMOCAO FUNCIONANDO
-    buscar(arqHeap);
+    buscaHeap(arqHeap);
 
     printf("\nREMOCAO: ");
 
-    tamanho = excluir(arqHeap,tamanho);
+    tamanho = excluiHeap(arqHeap,tamanho);
     fseek(arqHeap, 0, SEEK_SET);
     imprimeHeap(arqHeap, tamanho);
     */
 }
 
-/*
-int main(void){
-      srand(time(NULL));
-    geraRegistros("output/registros.bin",QUANT_REG);
-    imprimeArqBin("output/registros.bin");
-    int tamanho = 0;
-    FILE *arq = fopen("output/registros.bin", "rb+");
-    FILE *arqHeap = fopen("output/heap.bin", "wb+");
-    
-    for (int i = 0; i < QUANT_REG; i++){
-        TRegistro *reg = leRegistroBin(arq);
-        tamanho = inserir(arqHeap, reg, tamanho);
-        free(reg);
-    }
-
-    printf("\n\nTotal de registros inseridos no HEAP: %d", tamanho);
-
-    fclose(arqHeap);
-    fclose(arq);
-    
-    FILE *arqHeap2 = fopen("output/heap.bin", "rb+");
-
-    imprimeHeap(arqHeap2);
-    fclose(arqHeap2);
-    return 0;
-
-
-
-}*/

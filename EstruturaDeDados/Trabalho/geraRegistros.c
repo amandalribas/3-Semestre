@@ -68,21 +68,27 @@ void escreveRegBin(FILE *arq, TRegistro *reg){
 
 }
 
+TRegistro *preencheReg(long long int cpf, int nota, char nome[50]){
+    TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
+    reg->cpf = cpf;
+    reg->nota = nota;
+    strcpy(reg->nome, nome);
+    return reg;
+}
+
 
 void geraRegistros(){
     char **nomes = leArquivoTexto(TXT_NOME);
     char **sobrenomes = leArquivoTexto(TXT_SOBRENOME);
     FILE *arq = fopen(ARQ_REG, "wb");
-    TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
     for (int i = 0; i < QUANT_REG; i++){
         printf("\n\nRegistro %d", i);
-        reg->cpf = geraCPF();
-        reg->nota = geraNota();
-        strcpy(reg->nome, geraNome(nomes, sobrenomes));
+        TRegistro *reg = preencheReg(geraCPF(), geraNota(), geraNome(nomes,sobrenomes));
         escreveRegBin(arq, reg);
     }
     fclose(arq);
 }
+
 
 TRegistro *leRegistroBin(FILE *arq){
     TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
@@ -106,6 +112,11 @@ void imprimeArqBin(char *nomeArquivo){
         printf("\nRegistro %d= { CPF= %lld , NOME= %s, NOTA= %d }",i, reg->cpf, reg->nome, reg->nota);
     }
 }
+
+int geraChaveCPF(long long int cpf){
+    return cpf / 100;
+}
+
 /*
 
 int main(void){

@@ -11,6 +11,8 @@
 
 #define TAM_ARQTXT 80
 #define QUANT_REG 10000
+#define REG_TAM (sizeof(long long int) + sizeof(int) + sizeof(char) * 50)
+
 
 #define ARQ_REG "arquivos/registros.bin"
 
@@ -33,10 +35,11 @@ void imprimeVetor(char **nomes);
 
 void escreveRegBin(FILE *arq, TRegistro *reg);
 
+TRegistro *preencheReg(long long int cpf, int nota, char nome[50]);
 void geraRegistros();
 
 TRegistro *leRegistroBin(FILE *arq);
 void imprimeArqBin(char *nomeArquivo);
-
+int geraChaveCPF(long long int cpf);
 
 #endif 
