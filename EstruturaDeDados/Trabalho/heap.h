@@ -19,5 +19,7 @@ int excluiHeap(FILE *arq, int tamanho);
 
 void imprimeHeap(FILE *arq, int tamanho);
 void geraHeap();
-
+void geraBuscaHeap();
+void geraExcluiHeap();
+void geraInsereHeap();
 #endif

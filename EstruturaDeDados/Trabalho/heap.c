@@ -170,3 +170,85 @@ void geraHeap(){
     */
 }
 
+void geraBuscaHeap(){
+    FILE *arqHeap = fopen(ARQ_HEAP, "rb+");
+    TRegistro *reg = buscaHeap(arqHeap);
+    free(reg);
+    fclose(arqHeap);
+}
+
+void geraExcluiHeap() {
+    FILE *arqHeap = fopen(ARQ_HEAP, "rb+");
+    if (!arqHeap) {
+        printf("\nErro ao abrir arquivo heap!\n");
+        return;
+    }
+
+    fseek(arqHeap, 0, SEEK_END);
+    int tamanho = (ftell(arqHeap) / REG_TAM) - 1;
+    rewind(arqHeap);
+
+    if (tamanho <= 0) {
+        printf("\nHeap vazio - nada para remover!\n");
+        fclose(arqHeap);
+        return;
+    }
+
+    fseek(arqHeap, REG_TAM, SEEK_SET); 
+    TRegistro *topo = leRegistroBin(arqHeap);
+    printf("\nRemovendo registro:\n{ CPF= %lld, NOME= %s, NOTA= %d }", topo->cpf, topo->nome, topo->nota);
+    free(topo);
+
+    tamanho = excluiHeap(arqHeap, tamanho);
+
+    printf("\n\nHeap apos remoção (tamanho: %d):", tamanho);
+    imprimeHeap(arqHeap, tamanho);
+
+    fclose(arqHeap);
+}
+
+void geraInsereHeap() {
+    FILE *arqHeap = fopen(ARQ_HEAP, "rb+");
+    if (!arqHeap) {
+        
+        arqHeap = fopen(ARQ_HEAP, "wb+");
+        if (!arqHeap) {
+            printf("\nErro ao criar arquivo heap!\n");
+            return;
+        }
+   
+        TRegistro *vazio = preencheReg(-1, -1, "");
+        escreveRegBin(arqHeap, vazio);
+        free(vazio);
+    }
+
+    
+    fseek(arqHeap, 0, SEEK_END);
+    int tamanho = (ftell(arqHeap) / REG_TAM) - 1;  
+    rewind(arqHeap);
+
+    TRegistro novoReg;
+    printf("\nDigite o CPF: ");
+    scanf("%lld", &novoReg.cpf);
+    
+    
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
+    printf("Digite o nome: ");
+    fgets(novoReg.nome, sizeof(novoReg.nome), stdin);
+    novoReg.nome[strcspn(novoReg.nome, "\n")] = '\0'; 
+    
+    printf("Digite a nota: ");
+    scanf("%d", &novoReg.nota);
+
+    TRegistro *reg = preencheReg(novoReg.cpf, novoReg.nota, novoReg.nome);
+    tamanho = insereHeap(arqHeap, reg, tamanho);
+    free(reg);
+
+    printf("\nRegistro inserido com sucesso!");
+    printf("\n\nHeap atualizado (tamanho: %d):", tamanho);
+    imprimeHeap(arqHeap, tamanho);
+
+    fclose(arqHeap);
+}

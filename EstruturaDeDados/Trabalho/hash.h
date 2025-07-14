@@ -17,5 +17,7 @@ int excluiHash(FILE *arq, int chaveCPF);
 void imprimeHash(FILE *arq);
 
 void geraHash();
-
+void geraInsereHash();
+void geraBuscaHash();
+void geraExcluiHash();
 #endif

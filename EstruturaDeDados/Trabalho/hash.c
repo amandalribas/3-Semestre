@@ -1,14 +1,14 @@
 #include "hash.h"
 
-/*
+
 int h(int x, int k){
     srand(x);
     return ((rand()*2654435761U) + k) % M; //2654435761U multiplicador p manter uniforme  
-}*/
-
+}
+/*
 int h(){ //se der srand dentro do h vai sempre sair o mesmo numero, reinicia a seed
     return (rand() * 2654435761U) % M;  
-}
+}*/
 
 void inicilizaHash(FILE *arq){
     int vazio = -1;
@@ -21,31 +21,36 @@ void inicilizaHash(FILE *arq){
 }
 
 
-int buscaHash(FILE *arq, int chaveCPF){
-    int posicao;
-
-    //int posicao, k = 0;
-
-    TRegistro *atual;
-
-    int chaveCPFAtual = 0;
-    srand(chaveCPF);
+int buscaHash(FILE *arq, int chaveCPF) {
+    int posicao, k = 0;
+    TRegistro *atual = NULL;
 
     do {
-        posicao = h();
-        //posicao = h(chaveCPF, k);  //encontra a posicao que deve estar na hash
+        posicao = h(chaveCPF, k);
         fseek(arq, posicao * REG_TAM, SEEK_SET);
+        
+        // Libera registro anterior se existir
+        if (atual != NULL) {
+            free(atual);
+        }
+        
         atual = leRegistroBin(arq);
-        //chaveCPFAtual = geraChaveCPF(atual->cpf);
-        if (chaveCPFAtual == chaveCPF) {
+        
+        // Verifica se o registro é válido e se corresponde ao CPF buscado
+        if (atual != NULL && atual->cpf != -1 && geraChaveCPF(atual->cpf) == chaveCPF) {
+            free(atual);
             return posicao;  // encontrou
         }
 
-        //k++;
-    } while (atual->cpf != -1);
-    // while (atual->cpf != -1 && k < M);
-    return -1;
-    //retorna -1 se nao encontrou     
+        k++;
+    } while (atual != NULL && atual->cpf != -1 && k < M);
+
+    // Libera memória antes de retornar
+    if (atual != NULL) {
+        free(atual);
+    }
+    
+    return -1;  // não encontrou
 }
 
 
@@ -55,15 +60,15 @@ void insereHash(FILE *arq, TRegistro *reg){
        
     int posicao, k = 0;
     TRegistro *atual;
-    srand(chaveCPF);
+    //srand(chaveCPF);
     do {
-        //posicao = h(chaveCPF, k);
-        posicao = h();
+        posicao = h(chaveCPF, k);
+        //posicao = h();
         fseek(arq, posicao * REG_TAM, SEEK_SET);
         atual = leRegistroBin(arq);
-        //k++;
-    } while (atual->cpf != -1);
-    //while (atual->cpf != -1 && k < M);
+        k++;
+    } //while (atual->cpf != -1);
+    while (atual->cpf != -1 && k < M);
     if(atual->cpf == -1){
         fseek(arq, posicao*REG_TAM, SEEK_SET);
         escreveRegBin(arq,reg);
@@ -96,7 +101,7 @@ void imprimeHash(FILE *arq){
             j++;
         }
     }
-    printf("\n%d Registros Inseridos", j);
+    //printf("\n%d Registros Inseridos", j);
 }
 
 
@@ -127,5 +132,97 @@ void geraHash(){
     int pos = excluiHash(arqHash,chaveCPF);
     imprimeHash(arqHash);
     */
+    fclose(arqHash);
+}
+
+/*void geraInsereHash(){
+    FILE *arqHash = fopen(ARQ_HASH, "wb+");
+
+    inicilizaHash(arqHash);
+
+    char nome[50];
+    long long int cpf;
+    int nota;
+
+    printf("\nDigite o CPF a inserir: ");
+    scanf("%lld", &cpf);
+    printf("\nDigite o nome de %lld: ", cpf);
+    scanf("%s", nome);
+    printf("\nDigite a nota de %lld: ", cpf);
+    scanf("%d", &nota);
+    TRegistro *reg = preencheReg(cpf,nota,nome);
+    insereHash(arqHash, reg);
+    printf("\nInseri %d", cpf);
+    //printf("\n\nHASH: \n\n");
+    //imprimeHash(arqHash);
+   
+    fclose(arqHash);
+}*/
+void geraInsereHash() {
+    FILE *arqHash = fopen(ARQ_HASH, "rb+");
+    if (!arqHash) {
+        printf("\nErro ao abrir arquivo hash!\n");
+        return;
+    }
+
+    fseek(arqHash, 0, SEEK_END);
+    if (ftell(arqHash) == 0) {
+        inicilizaHash(arqHash);
+    }
+    rewind(arqHash);
+    // Coleta dados do novo registro
+    TRegistro novoReg;
+    printf("\nDigite o CPF a inserir: ");
+    scanf("%lld", &novoReg.cpf);
+    
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    
+    printf("Digite o nome: ");
+    fgets(novoReg.nome, sizeof(novoReg.nome), stdin);
+    novoReg.nome[strcspn(novoReg.nome, "\n")] = '\0'; 
+    
+    printf("Digite a nota: ");
+    scanf("%d", &novoReg.nota);
+
+    int chave = geraChaveCPF(novoReg.cpf);
+    if (buscaHash(arqHash, chave) != -1) {
+        printf("\nERRO: CPF %lld já existe na tabela!\n", novoReg.cpf);
+        fclose(arqHash);
+        return;
+    }
+
+    // Insere o novo registro
+    TRegistro *reg = preencheReg(novoReg.cpf, novoReg.nota, novoReg.nome);
+    insereHash(arqHash, reg);
+    free(reg);
+
+    printf("\nRegistro inserido com sucesso!\n");
+    
+    //printf("\nTabela Hash atualizada:\n");
+    //imprimeHash(arqHash);
+    
+    fclose(arqHash);
+}
+
+void geraBuscaHash(){
+    FILE *arqHash = fopen(ARQ_HASH, "rb+");
+    long long int cpf;
+    printf("Digite o CPF a ser BUSCADO:");
+    scanf("%lld", &cpf);
+    int chaveCPF = geraChaveCPF(cpf);
+    int pos = buscaHash(arqHash,chaveCPF);
+    printf("\n%d na posicao %d", chaveCPF, pos);
+    fclose(arqHash);
+}
+
+void geraExcluiHash(){
+    FILE *arqHash = fopen(ARQ_HASH, "rb+");
+    long long int cpf;
+    printf("Digite o CPF a ser EXCLUIDO:");
+    scanf("%lld", &cpf);
+    int chaveCPF = geraChaveCPF(cpf);
+    int pos = excluiHash(arqHash,chaveCPF);
+    imprimeHash(arqHash);
     fclose(arqHash);
 }

@@ -1,448 +1,445 @@
 #include "bMais.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-
-BPlusNode* criaNoBM(int folha) {
-    BPlusNode *node = (BPlusNode*)malloc(sizeof(BPlusNode));
-    node->folha = folha;
-    node->chaves = (int*)malloc(sizeof(int) * (2 * D));
-    node->numChaves = 0;
-    node->filhos = (BPlusNode**)malloc(sizeof(BPlusNode*) * (2 * D + 1));
-    
-    if (folha) {
-        node->registros = (TRegistro**)malloc(sizeof(TRegistro*) * (2 * D));
-        for (int i = 0; i < 2 * D; i++) {
-            node->registros[i] = NULL;
-        }
-    } else {
-        node->registros = NULL;
-    }
-    
-    for (int i = 0; i < 2 * D + 1; i++) {
-        node->filhos[i] = NULL;
-    }
-    
-    node->prox = NULL;
-    node->pai = NULL;
-    return node;
+TNoBM *criaBM() {
+    TNoBM* novo = (TNoBM*)malloc(sizeof(TNoBM));
+    novo->nChaves = 0;
+    novo->chave = (long long int*)malloc(sizeof(long long int)*((D*2)-1));
+    novo->folha = 1;
+    novo->filho = (TNoBM**)malloc(sizeof(TNoBM*)*D*2);
+    novo->prox = NULL;
+    for(int i=0; i<(D*2); i++) 
+        novo->filho[i] = NULL;
+    return novo;
 }
 
-void liberaBM(BPlusNode *root) {
-    if (root == NULL) return;
-    
-    if (root->folha) {
-        for (int i = 0; i < root->numChaves; i++) {
-            if (root->registros[i] != NULL) {
-                free(root->registros[i]);
-            }
-        }
-        free(root->registros);
-    } else {
-        for (int i = 0; i <= root->numChaves; i++) {
-            liberaBM(root->filhos[i]);
-        }
-    }
-    
-    free(root->chaves);
-    free(root->filhos);
-    free(root);
-}
-
-int buscaPosChave(BPlusNode *node, int key) {
-    int pos = 0;
-    while (pos < node->numChaves && key >= node->chaves[pos]) {
-        pos++;
-    }
-    return pos;
-}
-
-TRegistro* buscaBM(BPlusNode *root, long long int cpf) {
-    if (root == NULL) return NULL;
-    
-    int key = geraChaveCPF(cpf);
-    BPlusNode *current = root;
-    
-    while (!current->folha) {
-        int pos = buscaPosChave(current, key);
-        current = current->filhos[pos];
-    }
-    
-    int pos = buscaPosChave(current, key);
-    if (pos > 0 && current->chaves[pos-1] == key) {
-        pos--;
-    }
-    
-    for (int i = pos; i < current->numChaves && current->chaves[i] == key; i++) {
-        if (current->registros[i] != NULL && current->registros[i]->cpf == cpf) {
-            return current->registros[i];
-        }
-    }
-    
+TNoBM *inicializaBM(void) {
     return NULL;
 }
 
-BPlusNode* insereBM(BPlusNode *root, TRegistro *registro) {
-    int key = geraChaveCPF(registro->cpf);
-    
-    if (root == NULL) {
-        BPlusNode *new_root = criaNoBM(1);
-        new_root->chaves[0] = key;
-        new_root->registros[0] = registro;
-        new_root->numChaves = 1;
-        return new_root;
-    }
-    
-    BPlusNode *leaf = root;
-    while (!leaf->folha) {
-        int pos = buscaPosChave(leaf, key);
-        leaf = leaf->filhos[pos];
-    }
-    
-    // Verifica se o CPF já existe
-    if (buscaBM(root, registro->cpf) != NULL) {
-        printf("CPF %lld já existe!\n", registro->cpf);
-        free(registro);
-        return root;
-    }
-    
-    int pos = buscaPosChave(leaf, key);
-    
-    // Abre espaço para inserção
-    for (int i = leaf->numChaves; i > pos; i--) {
-        leaf->chaves[i] = leaf->chaves[i-1];
-        leaf->registros[i] = leaf->registros[i-1];
-    }
-    
-    leaf->chaves[pos] = key;
-    leaf->registros[pos] = registro;
-    leaf->numChaves++;
-    
-    if (leaf->numChaves <= 2 * D) {
-        return root;
-    }
-    
-    // Divisão da folha
-    BPlusNode *new_leaf = criaNoBM(1);
-    int split_pos = leaf->numChaves / 2;
-    
-    // Copia metade para nova folha
-    for (int i = split_pos; i < leaf->numChaves; i++) {
-        new_leaf->chaves[i-split_pos] = leaf->chaves[i];
-        new_leaf->registros[i-split_pos] = leaf->registros[i];
-    }
-    
-    new_leaf->numChaves = leaf->numChaves - split_pos;
-    leaf->numChaves = split_pos;
-    
-    // Atualiza encadeamento
-    new_leaf->prox = leaf->prox;
-    leaf->prox = new_leaf;
-    new_leaf->pai = leaf->pai;
-    
-    // Chave a ser promovida
-    int promoted_key = new_leaf->chaves[0];
-    
-    // Propaga a divisão
-    BPlusNode *pai = leaf->pai;
-    BPlusNode *child = new_leaf;
-    
-    while (1) {
-        if (pai == NULL) {
-            BPlusNode *new_root = criaNoBM(0);
-            new_root->chaves[0] = promoted_key;
-            new_root->filhos[0] = leaf;
-            new_root->filhos[1] = child;
-            new_root->numChaves = 1;
-            leaf->pai = new_root;
-            child->pai = new_root;
-            return new_root;
+void liberaBM(TNoBM *raiz) {
+    if(raiz) {
+        if(!raiz->folha) {
+            for(int i = 0; i <= raiz->nChaves; i++) 
+                liberaBM(raiz->filho[i]);
         }
-        
-        int pos = buscaPosChave(pai, promoted_key);
-        
-        // Abre espaço no pai
-        for (int i = pai->numChaves; i > pos; i--) {
-            pai->chaves[i] = pai->chaves[i-1];
-        }
-        for (int i = pai->numChaves + 1; i > pos + 1; i--) {
-            pai->filhos[i] = pai->filhos[i-1];
-        }
-        
-        pai->chaves[pos] = promoted_key;
-        pai->filhos[pos+1] = child;
-        pai->numChaves++;
-        
-        if (pai->numChaves <= 2 * D) {
-            break;
-        }
-        
-        // Divisão do nó interno
-        BPlusNode *new_internal = criaNoBM(0);
-        split_pos = pai->numChaves / 2;
-        promoted_key = pai->chaves[split_pos];
-        
-        // Copia metade para novo nó
-        for (int i = split_pos + 1; i < pai->numChaves; i++) {
-            new_internal->chaves[i-split_pos-1] = pai->chaves[i];
-        }
-        for (int i = split_pos + 1; i <= pai->numChaves; i++) {
-            new_internal->filhos[i-split_pos-1] = pai->filhos[i];
-            pai->filhos[i]->pai = new_internal;
-        }
-        
-        new_internal->numChaves = pai->numChaves - split_pos - 1;
-        pai->numChaves = split_pos;
-        
-        child = new_internal;
-        new_internal->pai = pai->pai;
-        pai = pai->pai;
+        free(raiz->filho);
+        free(raiz->chave);
+        free(raiz);
     }
-    
-    return root;
 }
 
-BPlusNode* excluiBM(BPlusNode *root, long long int cpf) {
-    if (root == NULL) return NULL;
+TNoBM *buscaBM(TNoBM *raiz, TRegistro *reg) {
+    if (!raiz) return NULL;
     
-    int key = geraChaveCPF(cpf);
-    BPlusNode *leaf = root;
+    long long int chave = reg->cpf;
+    int i = 0;
     
-    // Encontra a folha
-    while (!leaf->folha) {
-        int pos = buscaPosChave(leaf, key);
-        leaf = leaf->filhos[pos];
-    }
+    while (i < raiz->nChaves && chave > raiz->chave[i]) 
+        i++;
     
-    // Encontra o registro
-    int pos = -1;
-    for (int i = 0; i < leaf->numChaves; i++) {
-        if (leaf->chaves[i] == key && leaf->registros[i] != NULL && 
-            leaf->registros[i]->cpf == cpf) {
-            pos = i;
-            break;
-        }
-    }
+    if (i < raiz->nChaves && raiz->folha && chave == raiz->chave[i]) 
+        return raiz;
     
-    if (pos == -1) {
-        printf("Registro não encontrado!\n");
-        return root;
-    }
+    if (raiz->folha) 
+        return NULL;
     
-    // Remove o registro
-    free(leaf->registros[pos]);
-    for (int i = pos; i < leaf->numChaves - 1; i++) {
-        leaf->chaves[i] = leaf->chaves[i+1];
-        leaf->registros[i] = leaf->registros[i+1];
-    }
-    leaf->numChaves--;
+    if (i < raiz->nChaves && raiz->chave[i] == chave) 
+        i++;
     
-    // Verifica underflow
-    if (leaf == root || leaf->numChaves >= D) {
-        if (root->numChaves == 0 && root->folha) {
-            free(root);
-            return NULL;
-        }
-        return root;
-    }
-    
-    // Trata underflow
-    BPlusNode *pai = leaf->pai;
-    int leaf_pos = 0;
-    while (pai->filhos[leaf_pos] != leaf) leaf_pos++;
-    
-    // Tenta redistribuir com irmão esquerdo
-    if (leaf_pos > 0) {
-        BPlusNode *left = pai->filhos[leaf_pos-1];
-        if (left->numChaves > D) {
-            // Move o último elemento do irmão esquerdo
-            for (int i = leaf->numChaves; i > 0; i--) {
-                leaf->chaves[i] = leaf->chaves[i-1];
-                leaf->registros[i] = leaf->registros[i-1];
-            }
-            leaf->chaves[0] = left->chaves[left->numChaves-1];
-            leaf->registros[0] = left->registros[left->numChaves-1];
-            leaf->numChaves++;
-            left->numChaves--;
-            
-            pai->chaves[leaf_pos-1] = leaf->chaves[0];
-            return root;
-        }
-    }
-    
-    // Tenta redistribuir com irmão direito
-    if (leaf_pos < pai->numChaves) {
-        BPlusNode *right = pai->filhos[leaf_pos+1];
-        if (right->numChaves > D) {
-            // Move o primeiro elemento do irmão direito
-            leaf->chaves[leaf->numChaves] = right->chaves[0];
-            leaf->registros[leaf->numChaves] = right->registros[0];
-            leaf->numChaves++;
-            
-            for (int i = 0; i < right->numChaves - 1; i++) {
-                right->chaves[i] = right->chaves[i+1];
-                right->registros[i] = right->registros[i+1];
-            }
-            right->numChaves--;
-            
-            pai->chaves[leaf_pos] = right->chaves[0];
-            return root;
-        }
-    }
-    
-    // Concatenação necessária
-    if (leaf_pos > 0) {
-        // Concatena com irmão esquerdo
-        BPlusNode *left = pai->filhos[leaf_pos-1];
-        
-        for (int i = 0; i < leaf->numChaves; i++) {
-            left->chaves[left->numChaves + i] = leaf->chaves[i];
-            left->registros[left->numChaves + i] = leaf->registros[i];
-        }
-        left->numChaves += leaf->numChaves;
-        left->prox = leaf->prox;
-        
-        // Remove a chave de separação
-        for (int i = leaf_pos - 1; i < pai->numChaves - 1; i++) {
-            pai->chaves[i] = pai->chaves[i+1];
-        }
-        for (int i = leaf_pos; i < pai->numChaves; i++) {
-            pai->filhos[i] = pai->filhos[i+1];
-        }
-        pai->numChaves--;
-        
-        free(leaf);
-        
-        // Propaga se necessário
-        if (pai->numChaves < D && pai != root) {
-            // Lógica similar para nós internos
-        }
-        
-        if (pai == root && pai->numChaves == 0) {
-            BPlusNode *new_root = pai->filhos[0];
-            free(pai);
-            new_root->pai = NULL;
-            return new_root;
-        }
-    } else {
-        // Concatena com irmão direito
-        BPlusNode *right = pai->filhos[leaf_pos+1];
-        
-        for (int i = 0; i < right->numChaves; i++) {
-            leaf->chaves[leaf->numChaves + i] = right->chaves[i];
-            leaf->registros[leaf->numChaves + i] = right->registros[i];
-        }
-        leaf->numChaves += right->numChaves;
-        leaf->prox = right->prox;
-        
-        // Remove a chave de separação
-        for (int i = leaf_pos; i < pai->numChaves - 1; i++) {
-            pai->chaves[i] = pai->chaves[i+1];
-        }
-        for (int i = leaf_pos + 1; i < pai->numChaves; i++) {
-            pai->filhos[i] = pai->filhos[i+1];
-        }
-        pai->numChaves--;
-        
-        free(right);
-        
-        // Propaga se necessário
-        if (pai->numChaves < D && pai != root) {
-            // Lógica similar para nós internos
-        }
-        
-        if (pai == root && pai->numChaves == 0) {
-            BPlusNode *new_root = pai->filhos[0];
-            free(pai);
-            new_root->pai = NULL;
-            return new_root;
-        }
-    }
-    
-    return root;
+    return buscaBM(raiz->filho[i], reg);
 }
 
-TRegistro* create_registro(long long int cpf, const char *nome, int nota) {
-    TRegistro *reg = (TRegistro*)malloc(sizeof(TRegistro));
-    reg->cpf = cpf;
-    strncpy(reg->nome, nome, 49);
-    reg->nome[49] = '\0';
-    reg->nota = nota;
-    return reg;
-}
-
-void print_tree(BPlusNode *node, int level) {
-    if (node == NULL) return;
+void imprimeChavesBM(TNoBM *raiz) {
+    if(!raiz) return;
     
-    for (int i = 0; i < level; i++) printf("  ");
-    printf("Nó %s: ", node->folha ? "folha" : "interno");
-    for (int i = 0; i < node->numChaves; i++) {
-        printf("%d ", node->chaves[i]);
+    TNoBM *p = raiz;
+    while(p->filho[0]) 
+        p = p->filho[0];
+    
+    while(p) {
+        for(int i = 0; i < p->nChaves; i++) 
+            printf("%lld ", p->chave[i]);
+        p = p->prox;
     }
     printf("\n");
-    
-    if (!node->folha) {
-        for (int i = 0; i <= node->numChaves; i++) {
-            print_tree(node->filhos[i], level + 1);
+}
+
+void imp(TNoBM *raiz, int nivel) {
+    if(raiz) {
+        for(int i = 0; i <= raiz->nChaves-1; i++) {
+            imp(raiz->filho[i], nivel+1);
+            for(int j = 0; j <= nivel; j++) 
+                printf("\t");
+            printf("%lld\n", raiz->chave[i]);
         }
+        imp(raiz->filho[raiz->nChaves], nivel+1);
     }
 }
 
-void print_all_registros(BPlusNode *root) {
-    if (root == NULL) {
-        printf("ARVORE VAZIA!\n");
+void imprimeBM(TNoBM *raiz) {
+    imp(raiz, 0);
+}
+
+TNoBM *divisao(TNoBM *x, int pos, TNoBM* y) {
+    TNoBM *z = criaBM();
+    z->folha = y->folha;
+    
+    if(!y->folha) {
+        z->nChaves = D-1;
+        for(int j = 0; j < D-1; j++) 
+            z->chave[j] = y->chave[j+D];
+        
+        for(int j = 0; j < D; j++) {
+            z->filho[j] = y->filho[j+D];
+            y->filho[j+D] = NULL;
+        }
+    } else {
+        z->nChaves = D;
+        for(int j = 0; j < D; j++) 
+            z->chave[j] = y->chave[j+D-1];
+        z->prox = y->prox;
+        y->prox = z;
+    }
+    
+    y->nChaves = D-1;
+    
+    for(int j = x->nChaves; j >= pos; j--) 
+        x->filho[j+1] = x->filho[j];
+    x->filho[pos] = z;
+    
+    for(int j = x->nChaves; j >= pos; j--) 
+        x->chave[j] = x->chave[j-1];
+    
+    x->chave[pos-1] = y->chave[D-1];
+    x->nChaves++;
+    
+    return x;
+}
+
+TNoBM *insereNaoCompletoBM(TNoBM *x, TRegistro *reg) {
+    int i = x->nChaves-1;
+    long long int chave = reg->cpf;
+    
+    if(x->folha) {
+        while(i >= 0 && chave < x->chave[i]) {
+            x->chave[i+1] = x->chave[i];
+            i--;
+        }
+        x->chave[i+1] = chave;
+        x->nChaves++;
+        return x;
+    }
+    
+    while(i >= 0 && chave < x->chave[i]) 
+        i--;
+    i++;
+    
+    if(x->filho[i]->nChaves == (2*D-1)) {
+        x = divisao(x, i+1, x->filho[i]);
+        if(chave > x->chave[i]) 
+            i++;
+    }
+    
+    x->filho[i] = insereNaoCompletoBM(x->filho[i], reg);
+    return x;
+}
+
+TNoBM *insereBM(TNoBM *T, TRegistro *reg) {
+    long long int chave = reg->cpf;
+    
+    if(buscaBM(T, reg)) 
+        return T;
+    
+    if(!T) {
+        T = criaBM();
+        T->chave[0] = chave;
+        T->nChaves = 1;
+        return T;
+    }
+    
+    if(T->nChaves == (2*D-1)) {
+        TNoBM *S = criaBM();
+        S->folha = 0;
+        S->filho[0] = T;
+        S = divisao(S, 1, T);
+        S = insereNaoCompletoBM(S, reg);
+        return S;
+    }
+    
+    return insereNaoCompletoBM(T, reg);
+}
+
+TNoBM* excluiBM(TNoBM* arv, TRegistro *reg) {
+    if(!arv) return arv;
+    
+    long long int ch = reg->cpf;
+    int i = 0;
+    
+    while(i < arv->nChaves && arv->chave[i] < ch) 
+        i++;
+    
+    if(i < arv->nChaves && arv->chave[i] == ch && arv->folha) {
+        for(int j = i; j < arv->nChaves-1; j++) 
+            arv->chave[j] = arv->chave[j+1];
+        
+        arv->nChaves--;
+        
+        if(!arv->nChaves) {
+            liberaBM(arv);
+            return NULL;
+        }
+        return arv;
+    }
+    
+    if(i < arv->nChaves && arv->chave[i] == ch) 
+        i++;
+    
+    TNoBM *y = arv->filho[i];
+    
+    if(y->nChaves == D-1) {
+        
+    }
+    
+    arv->filho[i] = excluiBM(arv->filho[i], reg);
+    return arv;
+}
+
+TNoBM* retiraBM(TNoBM* arv, TRegistro *reg) {
+    if(!arv || !buscaBM(arv, reg)) 
+        return arv;
+    return excluiBM(arv, reg);
+}
+
+void imprimeRegistrosBM(TNoBM *raiz, FILE *arq) {
+    if (!raiz) return;
+    
+    TNoBM *p = raiz;
+    while (p && !p->folha) {
+        p = p->filho[0];
+    }
+    
+    int i = 0;
+    while (p) {
+        for (int j = 0; j < p->nChaves; j++) {
+            fseek(arq, 0, SEEK_SET);
+            TRegistro *reg = NULL;
+            
+            while ((reg = leRegistroBin(arq)) != NULL) {
+                if (reg->cpf == p->chave[j]) {
+                    printf("\nRegistro %d = { CPF= %lld, NOME= %s, NOTA= %d }", 
+                           i++, reg->cpf, reg->nome, reg->nota);
+                    free(reg);
+                    break;
+                }
+                free(reg);
+            }
+        }
+        p = p->prox;
+    }
+}
+
+void geraBM() {
+    FILE *arq = fopen(ARQ_REG, "rb");
+    if (!arq) {
+        printf("Erro ao abrir arquivo de registros\n");
         return;
     }
-    
-    BPlusNode *current = root;
-    while (!current->folha) {
-        current = current->filhos[0];
-    }
-    
-    printf("Registros ordenados:\n");
-    while (current != NULL) {
-        for (int i = 0; i < current->numChaves; i++) {
-            printf("CPF: %011lld, Nome: %s, Nota: %d\n",
-                   current->registros[i]->cpf,
-                   current->registros[i]->nome,
-                   current->registros[i]->nota);
+
+    TRegistro *reg = NULL;
+    TNoBM *arvore = inicializaBM();
+
+    for (int i = 0; i < QUANT_REG; i++) {
+        reg = leRegistroBin(arq);
+        if (reg) {
+            arvore = insereBM(arvore, reg);
+            free(reg);
         }
-        current = current->prox;
     }
+    
+    //printf("\nEstrutura da Arvore B+:\n");
+    //imprimeBM(arvore);
+    
+    printf("\nARVORE B+ GERADA:\n");
+    rewind(arq); 
+    imprimeRegistrosBM(arvore, arq);
+    
+    liberaBM(arvore);
+    fclose(arq);
+    
 }
 
-int main() {
-    BPlusNode *root = NULL;
-    //int D = 4; // Ordem da árvore (d=2)
-    
-    // Exemplo de inserção de registros
-    root = insereBM(root, create_registro(12345678901, "João Silva", 85));
-    root = insereBM(root, create_registro(98765432109, "Maria Souza", 92));
-    root = insereBM(root, create_registro(45678912345, "Carlos Oliveira", 78));
-    root = insereBM(root, create_registro(12345678902, "Ana Pereira", 88)); // Mesmos 9 primeiros dígitos que João
-    root = insereBM(root, create_registro(32165498700, "Pedro Santos", 95));
-    
-    // Tentativa de inserir CPF duplicado
-    root = insereBM(root, create_registro(12345678901, "João Silva Duplicado", 85));
-    
-    // Imprime a estrutura da árvore
-    printf("\nEstrutura da Árvore B+:\n");
-    print_tree(root, 0);
-    
-    // Imprime todos os registros em ordem
-    printf("\nTodos os Registros:\n");
-    print_all_registros(root);
-    
-    // Busca por um registro específico
-    long long int cpf_busca = 98765432109;
-    TRegistro *reg = buscaBM(root, cpf_busca);
-    if (reg != NULL) {
-        printf("\nRegistro encontrado para CPF %lld:\n", cpf_busca);
-        printf("Nome: %s, Nota: %d\n", reg->nome, reg->nota);
-    } else {
-        printf("\nRegistro com CPF %lld não encontrado!\n", cpf_busca);
+void geraBuscaBM() {
+    FILE *arq = fopen(ARQ_REG, "rb");
+    if (!arq) {
+        printf("Erro ao abrir arquivo de registros\n");
+        return;
+    }
+
+    TRegistro *reg = NULL;
+    TNoBM *arvore = inicializaBM();
+
+    for (int i = 0; i < QUANT_REG; i++) {
+        reg = leRegistroBin(arq);
+        if (reg) {
+            arvore = insereBM(arvore, reg);
+            free(reg);
+        }
     }
     
-    // Libera a memória
-    liberaBM(root);
+    long long int cpf;
+    printf("\nDigite o CPF a ser Procurado: ");
+    scanf("%lld", &cpf);
     
-    return 0;
+    TRegistro regBusca;
+    regBusca.cpf = cpf;
+    
+    TNoBM *no = buscaBM(arvore, &regBusca);
+    
+    if (no) {
+        // Se encontrou, procurar o registro completo no arquivo
+        rewind(arq);
+        TRegistro *regEncontrado = NULL;
+        while ((regEncontrado = leRegistroBin(arq)) != NULL) {
+            if (regEncontrado->cpf == cpf) {
+                printf("\nRegistro encontrado = { CPF= %lld, NOME= %s, NOTA= %d }", 
+                       regEncontrado->cpf, regEncontrado->nome, regEncontrado->nota);
+                free(regEncontrado);
+                break;
+            }
+            free(regEncontrado);
+        }
+    } else {
+        printf("\nRegistro com CPF %lld não encontrado.", cpf);
+    }
+    
+    liberaBM(arvore);
+    fclose(arq);
+}
+
+void geraExcluiBM() {
+    FILE *arq = fopen(ARQ_REG, "rb+");
+    if (!arq) {
+        printf("Erro ao abrir arquivo de registros\n");
+        return;
+    }
+
+    TRegistro *reg = NULL;
+    TNoBM *arvore = inicializaBM();
+    for (int i = 0; i < QUANT_REG; i++) {
+        reg = leRegistroBin(arq);
+        if (reg) {
+            arvore = insereBM(arvore, reg);
+            free(reg);
+        }
+    }
+
+    long long int cpf;
+    printf("\nDigite o CPF a ser removido: ");
+    scanf("%lld", &cpf);
+
+    TRegistro regBusca;
+    regBusca.cpf = cpf;
+
+    if (!buscaBM(arvore, &regBusca)) {
+        printf("\nRegistro com CPF %lld não encontrado.\n", cpf);
+        liberaBM(arvore);
+        fclose(arq);
+        return;
+    }
+
+    arvore = retiraBM(arvore, &regBusca);
+
+    FILE *aux = fopen("temp.bin", "wb");
+    rewind(arq);
+    
+    int removeu = 0;
+    TRegistro currentReg;
+    while (fread(&currentReg, sizeof(TRegistro), 1, arq)) {
+        if (currentReg.cpf != cpf) {
+            fwrite(&currentReg, sizeof(TRegistro), 1, aux);
+        } else {
+            removeu = 1;
+        }
+    }
+
+    fclose(arq);
+    fclose(aux);
+
+    remove(ARQ_REG);
+    rename("temp.bin", ARQ_REG);
+
+    if (removeu) {
+        printf("\nRegistro com CPF %lld removido com sucesso!\n", cpf);
+        //QUANT_REG--;
+    } else {
+        printf("\nErro: CPF %lld NAO encontrado no arquivo.\n", cpf);
+    }
+
+    printf("\nArvore apos remocao:\n");
+    imprimeRegistrosBM(arvore, arq);
+    
+    liberaBM(arvore);
+}
+
+void geraInsereBM() {
+    FILE *arq = fopen(ARQ_REG, "ab+");  
+    if (!arq) {
+        printf("Erro ao abrir arquivo de registros\n");
+        return;
+    }
+
+    TNoBM *arvore = inicializaBM();
+    rewind(arq);
+    TRegistro *reg = NULL;
+    for (int i = 0; i < QUANT_REG; i++) {
+        reg = leRegistroBin(arq);
+        if (reg) {
+            arvore = insereBM(arvore, reg);
+            free(reg);
+        }
+    }
+
+    
+    TRegistro novoReg;
+    printf("\nDigite o CPF: ");
+    scanf("%lld", &novoReg.cpf);
+    
+    // Clear input buffer
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
+    printf("Digite o nome: ");
+    fgets(novoReg.nome, sizeof(novoReg.nome), stdin);
+    novoReg.nome[strcspn(novoReg.nome, "\n")] = '\0';  // Remove newline
+    
+    printf("Digite a nota: ");
+    scanf("%d", &novoReg.nota);
+
+    TRegistro regBusca;
+    regBusca.cpf = novoReg.cpf;
+    if (buscaBM(arvore, &regBusca)) {
+        printf("\nERRO: CPF %lld já existe na árvore!\n", novoReg.cpf);
+        liberaBM(arvore);
+        fclose(arq);
+        return;
+    }
+
+    reg = preencheReg(novoReg.cpf, novoReg.nota, novoReg.nome);
+    arvore = insereBM(arvore, reg);
+    
+    fseek(arq, 0, SEEK_END);
+    escreveRegBin(arq, reg);
+    //QUANT_REG++;
+    
+    printf("\nRegistro inserido com sucesso!");
+    printf("\n\nÁrvore B+ atualizada:\n");
+    rewind(arq);
+    imprimeRegistrosBM(arvore, arq);
+    
+    free(reg);
+    liberaBM(arvore);
+    fclose(arq);
 }

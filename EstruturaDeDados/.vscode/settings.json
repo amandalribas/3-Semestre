@@ -9,6 +9,7 @@
         "heap.h": "c",
         "time.h": "c",
         "limits.h": "c",
-        "hash.h": "c"
+        "hash.h": "c",
+        "bmais.h": "c"
     }
 }

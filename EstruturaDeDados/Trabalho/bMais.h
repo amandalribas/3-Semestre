@@ -3,27 +3,41 @@
 
 #include "geraRegistros.h"
 
-#define D 2 // Ordem da árvore (número mínimo de chaves)
+#define D 5 // ORDEM DA ÁRVORE B+
 
-typedef struct bplus_node {
-    int folha;
-    int *chaves;
-    TRegistro **registros;
-    int numChaves;
-    struct bplus_node **filhos;
-    struct bplus_node *prox;
-    struct bplus_node *pai;
-} BPlusNode;
+typedef struct noBM {
+    int nChaves;          // Número de chaves no nó
+    int folha;            // Indicador de folha (1 para folha, 0 para nó interno)
+    long long int *chave; // Array de chaves
+    struct noBM **filho;  // Array de ponteiros para filhos
+    struct noBM *prox;    // Ponteiro para o próximo nó (usado em folhas)
+} TNoBM;
 
-// Protótipos das funções
-BPlusNode* criaNoBM(int folha);
-void liberaBM(BPlusNode *root);
-int buscaPosChave(BPlusNode *node, int chave);
-TRegistro* buscaBM(BPlusNode *root, long long int cpf);
-BPlusNode* insereBM(BPlusNode *root, TRegistro *registro);
-BPlusNode* excluiBM(BPlusNode *root, long long int cpf);
-TRegistro* create_registro(long long int cpf, const char *nome, int nota);
-void print_tree(BPlusNode *node, int level);
-void print_all_registros(BPlusNode *root);
+/* Operações básicas */
+TNoBM *criaBM(); 
+TNoBM *inicializaBM(); 
+void liberaBM(TNoBM *raiz);
+//void carregaRegistrosNaArvore(TNoBM **arvore);
+
+void geraBM();
+void geraBuscaBM();
+void geraExcluiBM();
+void geraInsereBM();
+/* Operações de busca */
+TNoBM *buscaBM(TNoBM *raiz, TRegistro *reg);
+
+/* Operações de impressão */
+void imprimeChavesBM(TNoBM *raiz);
+void imprimeBM(TNoBM *raiz);
+void imprimeRegistrosBM(TNoBM *raiz, FILE *arq);
+
+/* Operações de inserção */
+TNoBM *divisao(TNoBM *x, int i, TNoBM *y);
+TNoBM *insereNaoCompletoBM(TNoBM *x, TRegistro *reg);
+TNoBM *insereBM(TNoBM *T, TRegistro *reg);
+
+/* Operações de remoção */
+TNoBM *excluiBM(TNoBM *arv, TRegistro *reg);
+TNoBM *retiraBM(TNoBM *arv, TRegistro *reg);
 
 #endif
